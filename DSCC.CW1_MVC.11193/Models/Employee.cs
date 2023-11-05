@@ -14,10 +14,8 @@ namespace DSCC.CW1_MVC._11193.Models
 
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
-        public Gender Gender { get; set; }
 
-        [Display(Name = "Job Position")]
-        public string JobPosition { get; set; }
+        public Gender Gender { get; set; }
         public decimal Salary { get; set; }
         public virtual Department EmployeeDepartment { get; set; }
 
