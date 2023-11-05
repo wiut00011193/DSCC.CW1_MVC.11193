@@ -1,10 +1,32 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 
 namespace DSCC.CW1_MVC._11193.Controllers
 {
     public class EmployeeController : Controller
     {
+        // The Definition of Base URL
+        public const string baseUrl = "http://localhost:5116/";
+        Uri ClientBaseAddress = new Uri(baseUrl);
+        HttpClient clnt;
+
+        // Constructor for initiating request to the given base URL publicly
+        public EmployeeController()
+        {
+            clnt = new HttpClient();
+            clnt.BaseAddress = ClientBaseAddress;
+        }
+
+        public void HeaderClearing()
+        {
+            // Clearing default headers
+            clnt.DefaultRequestHeaders.Clear();
+
+            // Define the request type of the data
+            clnt.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
         // GET: EmployeeController
         public ActionResult Index()
         {
