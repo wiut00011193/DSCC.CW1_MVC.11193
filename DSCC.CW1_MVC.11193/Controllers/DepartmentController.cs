@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace DSCC.CW1_MVC._11193.Controllers
 {
@@ -52,73 +53,155 @@ namespace DSCC.CW1_MVC._11193.Controllers
             return View(DepartmentInfo);
         }
 
-        // GET: DepartmentController/Details/5
+        // GET: Department/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            // Creating a Get Request to get single Department
+            Department DepartmentDetails = new Department();
+
+            HeaderClearing();
+
+            // Creating a get request after preparation of get URL and assignin the results
+            HttpResponseMessage httpResponseMessageDetails = clnt.GetAsync(clnt.BaseAddress + "api/Department/" + id).Result;
+
+            // Checking for response state
+            if (httpResponseMessageDetails.IsSuccessStatusCode)
+            {
+                // storing the response details received from web api 
+                string detailsInfo = httpResponseMessageDetails.Content.ReadAsStringAsync().Result;
+
+                // deserializing the response
+                DepartmentDetails = JsonConvert.DeserializeObject<Department>(detailsInfo);
+            }
+
+            return View(DepartmentDetails);
         }
 
-        // GET: DepartmentController/Create
+        // GET: Department/Create
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: DepartmentController/Create
+        // POST: Department/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Department department)
         {
-            try
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                // serializing department object into json format to send
+                /*string jsonObject = "{"+department."}"*/
+                string createDepartmentInfo = JsonConvert.SerializeObject(department);
+
+                // creating string content to pass as Http content later
+                StringContent stringContentInfo = new StringContent(createDepartmentInfo, Encoding.UTF8, "application/json");
+
+                // Making a Post request
+                HttpResponseMessage createHttpResponseMessage = clnt.PostAsync(clnt.BaseAddress + "api/Department/", stringContentInfo).Result;
+                if (createHttpResponseMessage.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(department);
         }
 
-        // GET: DepartmentController/Edit/5
+        // GET: Department/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            // Creating a Get Request to get single Department
+            Department DepartmentDetails = new Department();
+
+            HeaderClearing();
+
+            // Creating a get request after preparation of get URL and assignin the results
+            HttpResponseMessage httpResponseMessageDetails = clnt.GetAsync(clnt.BaseAddress + "api/Department/" + id).Result;
+
+            // Checking for response state
+            if (httpResponseMessageDetails.IsSuccessStatusCode)
+            {
+                // storing the response details received from web api 
+                string detailsInfo = httpResponseMessageDetails.Content.ReadAsStringAsync().Result;
+
+                // deserializing the response
+                DepartmentDetails = JsonConvert.DeserializeObject<Department>(detailsInfo);
+            }
+
+            return View(DepartmentDetails);
         }
 
-        // POST: DepartmentController/Edit/5
+        // POST: Department/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(Department department)
         {
-            try
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                // serializing department object into json format to send
+                /*string jsonObject = "{"+department."}"*/
+                string createDepartmentInfo = JsonConvert.SerializeObject(department);
+
+                // creating string content to pass as Http content later
+                StringContent stringContentInfo = new StringContent(createDepartmentInfo, Encoding.UTF8, "application/json");
+
+                // Making a Post request
+                HttpResponseMessage createHttpResponseMessage = clnt.PutAsync(clnt.BaseAddress + "api/Department/" + department.ID, stringContentInfo).Result;
+                if (createHttpResponseMessage.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(department);
         }
 
-        // GET: DepartmentController/Delete/5
+        // GET: Department/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            // Creating a Get Request to get single Department
+            Department DepartmentDetails = new Department();
+
+            HeaderClearing();
+
+            // Creating a get request after preparation of get URL and assignin the results
+            HttpResponseMessage httpResponseMessageDetails = clnt.GetAsync(clnt.BaseAddress + "api/Department/" + id).Result;
+
+            // Checking for response state
+            if (httpResponseMessageDetails.IsSuccessStatusCode)
+            {
+                // storing the response details received from web api 
+                string detailsInfo = httpResponseMessageDetails.Content.ReadAsStringAsync().Result;
+
+                // deserializing the response
+                DepartmentDetails = JsonConvert.DeserializeObject<Department>(detailsInfo);
+            }
+
+            return View(DepartmentDetails);
         }
 
-        // POST: DepartmentController/Delete/5
+        // POST: Department/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(Department department)
         {
-            try
+
+            // serializing department object into json format to send
+            /*string jsonObject = "{"+department."}"*/
+            string createDepartmentInfo = JsonConvert.SerializeObject(department);
+
+            // creating string content to pass as Http content later
+            StringContent stringContentInfo = new StringContent(createDepartmentInfo, Encoding.UTF8, "application/json");
+
+            // Making a Post request
+            HttpResponseMessage createHttpResponseMessage = clnt.DeleteAsync(clnt.BaseAddress + "api/Department/" + department.ID).Result;
+            if (createHttpResponseMessage.IsSuccessStatusCode)
             {
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(department);
         }
     }
 }
