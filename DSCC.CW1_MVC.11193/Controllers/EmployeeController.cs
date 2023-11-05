@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DSCC.CW1_MVC._11193.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace DSCC.CW1_MVC._11193.Controllers
 {
@@ -27,79 +31,241 @@ namespace DSCC.CW1_MVC._11193.Controllers
             clnt.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        // GET: EmployeeController
-        public ActionResult Index()
+        // GET: Employee
+        public async Task<ActionResult> Index()
         {
-            return View();
+            // Creating the list of new Employees list
+            List<Employee> EmployeeInfo = new List<Employee>();
+
+            HeaderClearing();
+
+            // Sending Request to the find web api Rest service resources using HTTPClient
+            HttpResponseMessage httpResponseMessage = await clnt.GetAsync("api/Employee");
+
+            // If the request is success
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                // storing the web api data into model that was predefined prior
+                var responseMessage = httpResponseMessage.Content.ReadAsStringAsync().Result;
+
+                EmployeeInfo = JsonConvert.DeserializeObject<List<Employee>>(responseMessage);
+            }
+
+            return View(EmployeeInfo);
         }
 
-        // GET: EmployeeController/Details/5
+        // GET: Employee/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            // Creating a Get Request to get single Employee
+            Employee EmployeeDetails = new Employee();
+
+            HeaderClearing();
+
+            // Creating a get request after preparation of get URL and assignin the results
+            HttpResponseMessage httpResponseMessageDetails = clnt.GetAsync(clnt.BaseAddress + "api/Employee/" + id).Result;
+
+            // Checking for response state
+            if (httpResponseMessageDetails.IsSuccessStatusCode)
+            {
+                // storing the response details received from web api 
+                string detailsInfo = httpResponseMessageDetails.Content.ReadAsStringAsync().Result;
+
+                // deserializing the response
+                EmployeeDetails = JsonConvert.DeserializeObject<Employee>(detailsInfo);
+            }
+
+            EmployeeDetails.EmployeeDepartment = GetDepartment(EmployeeDetails.EmployeeDepartmentId);
+
+            return View(EmployeeDetails);
         }
 
-        // GET: EmployeeController/Create
+        // GET: Employee/Create
         public ActionResult Create()
         {
+            ViewBag.Departments = GetDepartmentsSelectList();
             return View();
         }
 
-        // POST: EmployeeController/Create
+        // POST: Employee/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Employee employee)
         {
-            try
+            employee.EmployeeDepartment = GetDepartment(employee.EmployeeDepartmentId);
+
+            // serializing employee object into json format to send
+            /*string jsonObject = "{"+employee."}"*/
+            string createEmployeeInfo = JsonConvert.SerializeObject(employee);
+
+            // creating string content to pass as Http content later
+            StringContent stringContentInfo = new StringContent(createEmployeeInfo, Encoding.UTF8, "application/json");
+
+            // Making a Post request
+            HttpResponseMessage createHttpResponseMessage = clnt.PostAsync(clnt.BaseAddress + "api/Employee/", stringContentInfo).Result;
+            Console.WriteLine(createHttpResponseMessage);
+            if (createHttpResponseMessage.IsSuccessStatusCode)
             {
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
+
+
+            return View(employee);
         }
 
-        // GET: EmployeeController/Edit/5
+        // GET: Employee/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            // Creating a Get Request to get single Employee
+            Employee EmployeeDetails = new Employee();
+
+            HeaderClearing();
+
+            // Creating a get request after preparation of get URL and assignin the results
+            HttpResponseMessage httpResponseMessageDetails = clnt.GetAsync(clnt.BaseAddress + "api/Employee/" + id).Result;
+
+            // Checking for response state
+            if (httpResponseMessageDetails.IsSuccessStatusCode)
+            {
+                // storing the response details received from web api 
+                string detailsInfo = httpResponseMessageDetails.Content.ReadAsStringAsync().Result;
+
+                // deserializing the response
+                EmployeeDetails = JsonConvert.DeserializeObject<Employee>(detailsInfo);
+            }
+
+            ViewBag.Departments = GetDepartmentsSelectList();
+            return View(EmployeeDetails);
         }
 
-        // POST: EmployeeController/Edit/5
+        // POST: Employee/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(Employee employee)
         {
-            try
+            employee.EmployeeDepartment = GetDepartment(employee.EmployeeDepartmentId);
+            // serializing employee object into json format to send
+            /*string jsonObject = "{"+employee."}"*/
+            string createEmployeeInfo = JsonConvert.SerializeObject(employee);
+
+            // creating string content to pass as Http content later
+            StringContent stringContentInfo = new StringContent(createEmployeeInfo, Encoding.UTF8, "application/json");
+            // Making a Post request
+            HttpResponseMessage createHttpResponseMessage = clnt.PutAsync(clnt.BaseAddress + "api/Employee/" + employee.ID, stringContentInfo).Result;
+            if (createHttpResponseMessage.IsSuccessStatusCode)
             {
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(employee);
         }
 
-        // GET: EmployeeController/Delete/5
+        // GET: Employee/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            // Creating a Get Request to get single Employee
+            Employee EmployeeDetails = new Employee();
+
+            HeaderClearing();
+
+            // Creating a get request after preparation of get URL and assignin the results
+            HttpResponseMessage httpResponseMessageDetails = clnt.GetAsync(clnt.BaseAddress + "api/Employee/" + id).Result;
+
+            // Checking for response state
+            if (httpResponseMessageDetails.IsSuccessStatusCode)
+            {
+                // storing the response details received from web api 
+                string detailsInfo = httpResponseMessageDetails.Content.ReadAsStringAsync().Result;
+
+                // deserializing the response
+                EmployeeDetails = JsonConvert.DeserializeObject<Employee>(detailsInfo);
+            }
+
+            EmployeeDetails.EmployeeDepartment = GetDepartment(EmployeeDetails.EmployeeDepartmentId);
+
+            return View(EmployeeDetails);
         }
 
-        // POST: EmployeeController/Delete/5
+        // POST: Employee/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(Employee employee)
         {
-            try
+            employee.EmployeeDepartment = GetDepartment(employee.EmployeeDepartmentId);
+
+            // serializing employee object into json format to send
+            /*string jsonObject = "{"+employee."}"*/
+            string createEmployeeInfo = JsonConvert.SerializeObject(employee);
+
+            // creating string content to pass as Http content later
+            StringContent stringContentInfo = new StringContent(createEmployeeInfo, Encoding.UTF8, "application/json");
+            // Making a Post request
+            HttpResponseMessage createHttpResponseMessage = clnt.DeleteAsync(clnt.BaseAddress + "api/Employee/" + employee.ID).Result;
+            if (createHttpResponseMessage.IsSuccessStatusCode)
             {
                 return RedirectToAction(nameof(Index));
             }
-            catch
+
+
+            return View(employee);
+        }
+
+        private List<SelectListItem> GetDepartmentsSelectList()
+        {
+            List<Department> DepartmentInfo = new List<Department>();
+
+            HeaderClearing();
+
+            HttpResponseMessage httpResponseMessage = clnt.GetAsync("api/Department").Result;
+
+            // If the request is success
+            if (httpResponseMessage.IsSuccessStatusCode)
             {
-                return View();
+                // storing the web api data into model that was predefined prior
+                var responseMessage = httpResponseMessage.Content.ReadAsStringAsync().Result;
+
+                DepartmentInfo = JsonConvert.DeserializeObject<List<Department>>(responseMessage);
             }
+
+            var listDepartment = new List<SelectListItem>();
+
+            listDepartment = DepartmentInfo.Select(d => new SelectListItem()
+            {
+                Value = d.ID.ToString(),
+                Text = d.Name
+            }).ToList();
+
+            var defItem = new SelectListItem()
+            {
+                Value = "",
+                Text = "--Select Department--"
+            };
+
+            listDepartment.Insert(0, defItem);
+
+            return listDepartment;
+        }
+
+        private Department GetDepartment(int id)
+        {
+            Department DepartmentDetails = new Department();
+
+            HeaderClearing();
+
+            // Creating a get request after preparation of get URL and assignin the results
+            HttpResponseMessage httpResponseMessageDetails = clnt.GetAsync(clnt.BaseAddress + "api/Department/" + id).Result;
+
+            // Checking for response state
+            if (httpResponseMessageDetails.IsSuccessStatusCode)
+            {
+                // storing the response details received from web api 
+                string detailsInfo = httpResponseMessageDetails.Content.ReadAsStringAsync().Result;
+
+                // deserializing the response
+                DepartmentDetails = JsonConvert.DeserializeObject<Department>(detailsInfo);
+            }
+
+            return DepartmentDetails;
         }
     }
 }
