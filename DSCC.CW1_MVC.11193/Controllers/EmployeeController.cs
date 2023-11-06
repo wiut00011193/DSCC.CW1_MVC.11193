@@ -11,7 +11,7 @@ namespace DSCC.CW1_MVC._11193.Controllers
     public class EmployeeController : Controller
     {
         // The Definition of Base URL
-        public const string baseUrl = "http://localhost:5116/";
+        public const string baseUrl = "http://ec2-13-49-226-43.eu-north-1.compute.amazonaws.com/";
         Uri ClientBaseAddress = new Uri(baseUrl);
         HttpClient clnt;
 
